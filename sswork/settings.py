@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-
+import shutil
 # Load environment variables
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -88,10 +88,11 @@ DATABASES = {
 }
 
 SAML_DOMAIN = os.getenv('SAML_DOMAIN', 'https://localhost:8000')
+XMLSEC_BINARY = shutil.which('xmlsec1') or '/usr/bin/xmlsec1'
 
 SAML_IDP_CONFIG = {
     'debug': DEBUG,
-    'xmlsec_binary': '/usr/bin/xmlsec1', 
+    'xmlsec_binary': XMLSEC_BINARY, 
     'entityid': f'{SAML_DOMAIN}/idp/metadata/',
     'description': 'Your Organization IdP',
     
