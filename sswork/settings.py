@@ -9,9 +9,12 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
+# Load environment variables
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -75,15 +78,21 @@ WSGI_APPLICATION = 'sswork.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('NAME'), 
+        'USER': os.getenv('USER'),
+        'PASSWORD': os.getenv('PASSWORD'),
+        'HOST': os.getenv('HOST'), 
+        'PORT': 5432, 
     }
 }
+
+SAML_DOMAIN = os.getenv('SAML_DOMAIN', 'https://localhost:8000')
 
 SAML_IDP_CONFIG = {
     'debug': DEBUG,
     'xmlsec_binary': '/usr/bin/xmlsec1', 
-    'entityid': 'https://your-domain.com/idp/metadata/',
+    'entityid': f'{SAML_DOMAIN}/idp/metadata/',
     'description': 'Your Organization IdP',
     
     'service': {
@@ -91,12 +100,12 @@ SAML_IDP_CONFIG = {
             'name': 'Django SAML IdP',
             'endpoints': {
                 'single_sign_on_service': [
-                    ('https://your-domain.com/idp/sso/post/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
-                    ('https://your-domain.com/idp/sso/redirect/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'),
+                    (f'{SAML_DOMAIN}/idp/sso/post/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
+                    (f'{SAML_DOMAIN}/idp/sso/redirect/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'),
                 ],
                 'single_logout_service': [
-                    ('https://your-domain.com/idp/slo/post/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
-                    ('https://your-domain.com/idp/slo/redirect/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'),
+                    (f'{SAML_DOMAIN}/idp/slo/post/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
+                    (f'{SAML_DOMAIN}/idp/slo/redirect/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'),
                 ],
             },
             'name_id_format': [
@@ -112,7 +121,6 @@ SAML_IDP_CONFIG = {
     'key_file': str(BASE_DIR / 'private.key'),
     'cert_file': str(BASE_DIR / 'public.cert'),
     
-    # Metadata validity
     'valid_for': 24 * 365,
 }
 
